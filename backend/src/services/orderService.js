@@ -130,23 +130,17 @@ async function createOrder(userId, { addressId, couponCode, paymentMethod }, opt
 
 async function listUserOrders(userId, query) {
   const { page, limit, offset } = buildPagination(query);
-
   const { rows, count } = await models.Order.findAndCountAll({
     where: { userId },
+     include: [{ model: models.OrderItem, as: 'items' }],
     order: [['createdAt', 'DESC']],
     offset,
     limit,
+    distinct: true,
   });
-
-  const orders = [];
-  for (const order of rows) {
-    const items = await models.OrderItem.findAll({ where: { orderId: order.id } });
-    orders.push({ ...order.toJSON(), items });
-  }
-
-  return { rows: orders, count, page, limit };
+  return { rows, count, page, limit };
 }
-
+  
 async function getOrderById(orderId) {
   const order = await models.Order.findByPk(orderId, {
     include: [
