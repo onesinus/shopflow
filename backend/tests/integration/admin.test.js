@@ -59,8 +59,42 @@ describe('/api/v1/admin', () => {
     expect(res.body.data[0].productId).toBe(low.id);
   });
 
-  it('returns 501 for the not-yet-implemented sales export', async () => {
+  it('includes orders placed late on the end date for same-day sales reports', async () => {
     const admin = await createUser({ email: 'admin2@example.com', roleId: 1 });
+    const adminToken = await loginAs(admin.email);
+    const customer = await createUser({ email: 'cust2@example.com' });
+    const custToken = await loginAs(customer.email);
+    const category = await createCategory();
+    const product = await createProduct(category.id, { sku: 'SR-1', priceCents: 2500 });
+    await createInventory(product.id, 10);
+    const address = await models.Address.create({
+      userId: customer.id,
+      firstName: 'S',
+      lastName: 'R',
+      line1: '1 Main St',
+      city: 'Portland',
+      country: 'US',
+    });
+
+    await request(app).post('/api/v1/cart/items').set(auth(custToken)).send({ productId: product.id, quantity: 1 });
+    const orderRes = await request(app).post('/api/v1/orders').set(auth(custToken)).send({ addressId: address.id });
+
+    const today = new Date();
+    const orderDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 0, 0);
+    await models.Order.update({ createdAt: orderDate }, { where: { id: orderRes.body.data.id } });
+
+    const day = orderDate.toISOString().slice(0, 10);
+    const res = await request(app)
+      .get('/api/v1/admin/reports/sales')
+      .query({ from: day, to: day })
+      .set(auth(adminToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.ordersCount).toBe(1);
+  });
+
+  it('returns 501 for the not-yet-implemented sales export', async () => {
+    const admin = await createUser({ email: 'admin3@example.com', roleId: 1 });
     const adminToken = await loginAs(admin.email);
 
     const res = await request(app).get('/api/v1/admin/reports/sales/export').set(auth(adminToken));
