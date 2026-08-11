@@ -181,6 +181,16 @@ async function cancelOrder(userId, orderId) {
     throw ApiError.badRequest('This order can no longer be cancelled');
   }
 
+  const orderItems = await models.OrderItem.findAll({ where: { orderId: order.id } });
+
+  for (const item of orderItems) {
+    const inventory = await inventoryFor(item);
+    if (inventory) {
+      inventory.quantity += item.quantity;
+      await inventory.save();
+    }
+  }
+
   order.status = 'cancelled';
   order.paymentStatus = 'failed';
   await order.save();
