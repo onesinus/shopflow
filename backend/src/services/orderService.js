@@ -160,9 +160,12 @@ async function getOrderById(orderId) {
   return order;
 }
 
-async function getUserOrder(orderId) {
+async function getUserOrder(userId, orderId) {
   const order = await models.Order.findOne({
-    where: { id: orderId },
+    where: {
+      id: orderId,
+      userId,
+    },
     include: [
       { model: models.OrderItem, as: 'items' },
       { model: models.Payment, as: 'payment' },
@@ -170,7 +173,9 @@ async function getUserOrder(orderId) {
       { model: models.Coupon, as: 'coupon' },
     ],
   });
+
   if (!order) throw ApiError.notFound('Order not found');
+
   return order;
 }
 
