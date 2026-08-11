@@ -12,9 +12,15 @@ const list = asyncHandler(async (req, res) => {
 
 const detail = asyncHandler(async (req, res) => {
   const product = await productService.getProductById(req.params.id);
+
   if (!product) {
-    return res.status(200).json({ data: null });
+    return res.status(404).json({
+      error: {
+        message: 'Product not found',
+      },
+    });
   }
+
   return ok(res, product);
 });
 
