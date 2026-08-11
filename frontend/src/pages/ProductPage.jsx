@@ -27,6 +27,8 @@ export default function ProductPage() {
     productsApi
       .getBySlug(slug)
       .then((p) => {
+        console.log('PRODUCT DATA:', p);
+        
         setProduct(p);
         setVariantId(p.variants?.length ? p.variants[0].id : null);
         if (p.categoryId) {
@@ -115,24 +117,33 @@ export default function ProductPage() {
 
           <div className="qty-group">
             <label htmlFor="qty">Quantity</label>
-            <input
-              id="qty"
-              type="number"
-              min="1"
-              max={product.stock ?? 99}
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-            />
-          </div>
+
+            <div>
+              <input
+                id="qty"
+                type="number"
+                min="1"
+                max={product.inventory?.quantity ?? 99}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+              />
+
+                {product.inventory?.quantity !== undefined && (
+                  <span className="muted">
+                      <span style={{ marginLeft: '6px '}}>{product.inventory.quantity} </span> available
+                  </span>
+                )}
+              </div>
+            </div>
 
           <div className="product-actions">
             <button
               type="button"
               className="btn btn-primary"
               onClick={handleAddToCart}
-              disabled={adding || product.stock === 0}
+              disabled={adding || product.inventory?.quantity === 0}
             >
-              {product.stock === 0 ? 'Out of stock' : adding ? 'Adding…' : 'Add to cart'}
+              {product.inventory?.quantity === 0 ? 'Out of stock' : adding ? 'Adding…' : 'Add to cart'}
             </button>
             <button type="button" className="btn btn-outline" onClick={handleToggleWishlist}>
               ♡ Wishlist

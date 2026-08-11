@@ -1,0 +1,7 @@
+{
+  "name": "shopflow-root",
+  "private": true,
+  "scripts": {
+    "test": "npm --prefix backend test"
+  }
+}
