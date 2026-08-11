@@ -91,6 +91,7 @@ export default function CartPage() {
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={() => changeQty(item, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
                   >
                     −
                   </button>
@@ -99,6 +100,7 @@ export default function CartPage() {
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={() => changeQty(item, item.quantity + 1)}
+                    disabled={item.quantity >= item.stock}
                   >
                     +
                   </button>
