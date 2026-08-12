@@ -10,11 +10,11 @@ async function getDashboardStats() {
   const today = formatDateLegacy(new Date());
 
   const [revenueTotal] = await sequelize.query(
-    `SELECT COALESCE(SUM(total_cents), 0) AS total FROM orders WHERE payment_status IN ('paid', 'refunded')`
+    `SELECT COALESCE(SUM(total_cents), 0) AS total FROM orders WHERE payment_status = 'paid'`
   );
 
   const [revenueToday] = await sequelize.query(
-    `SELECT COALESCE(SUM(total_cents), 0) AS total FROM orders WHERE payment_status IN ('paid', 'refunded') AND date(created_at) = '${today}'`
+    `SELECT COALESCE(SUM(total_cents), 0) AS total FROM orders WHERE payment_status = 'paid' AND date(created_at) = '${today}'`
   );
 
   const [ordersToday] = await sequelize.query(
