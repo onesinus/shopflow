@@ -4,12 +4,12 @@ const INT_SHIPPING_CENTS = 1499;
 const TAX_RATE = 0.0825;
 
 function shippingFor(subtotalCents, country) {
-  if (subtotalCents > SHIPPING_THRESHOLD_CENTS) return 0;
+  if (subtotalCents >= SHIPPING_THRESHOLD_CENTS) return 0;
   return country === 'US' ? US_SHIPPING_CENTS : INT_SHIPPING_CENTS;
 }
 
 function taxFor(subtotalCents) {
-  return Math.floor(subtotalCents * TAX_RATE);
+  return Math.round(subtotalCents * TAX_RATE);
 }
 
 function discountFor(subtotalCents, coupon) {

@@ -14,8 +14,13 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const detail = asyncHandler(async (req, res) => {
-  const order = await orderService.getUserOrder(req.params.orderId);
+  const order = await orderService.getUserOrder(req.user.id, req.params.orderId);
   return ok(res, order);
+});
+
+const count = asyncHandler(async (req, res) => {
+  const count = await orderService.countOrders();
+  return ok(res, { count });
 });
 
 const cancel = asyncHandler(async (req, res) => {
@@ -23,4 +28,4 @@ const cancel = asyncHandler(async (req, res) => {
   return ok(res, order);
 });
 
-module.exports = { checkout, list, detail, cancel };
+module.exports = { checkout, list, detail, count, cancel };
