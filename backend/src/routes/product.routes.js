@@ -1,10 +1,19 @@
 const router = require('express').Router();
-const { body } = require('express-validator');
+const { body, query } = require('express-validator');
 const { requireAuth, requireStaffOrAdmin } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const productController = require('../controllers/productController');
 
-router.get('/', productController.list);
+router.get(
+  '/',
+  validate([
+    query('min_price').optional().isInt({ min: 0 }).withMessage('min_price must be a non-negative integer'),
+    query('max_price').optional().isInt({ min: 0 }).withMessage('max_price must be a non-negative integer'),
+    query('category').optional().isInt().withMessage('category must be an integer'),
+    query('inStock').optional().isIn(['true', 'false', '1', '0']).withMessage('inStock must be true or false'),
+  ]),
+  productController.list
+);
 router.get('/slug/:slug', productController.bySlug);
 router.get('/:id/reviews', productController.listReviews);
 router.get('/:id', productController.detail);
