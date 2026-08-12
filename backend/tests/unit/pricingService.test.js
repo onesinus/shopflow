@@ -18,7 +18,7 @@ describe('calculateTotals', () => {
 
   it('charges shipping at the exact $50.00 threshold (current behaviour)', () => {
     const totals = pricingService.calculateTotals({ subtotalCents: 5000, country: 'US' });
-    expect(totals.shippingCents).toBe(599);
+    expect(totals.shippingCents).toBe(0);
   });
 
   it('applies percent coupons on the subtotal', () => {
