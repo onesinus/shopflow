@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { cartApi } from '../api/cart';
 import { ordersApi, addressApi, couponsApi } from '../api/orders';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import Price from '../components/Price';
 import Spinner from '../components/Spinner';
 
 export default function CheckoutPage() {
   const { toast } = useToast();
+  const { refresh: refreshCart } = useCart();
   const navigate = useNavigate();
 
   const [cart, setCart] = useState(null);
@@ -73,6 +75,7 @@ export default function CheckoutPage() {
         couponCode: couponCode || undefined,
       });
       toast('Order placed', 'success');
+      refreshCart();
       navigate(`/orders/${order.id}`);
     } catch (err) {
       setError(err.message);

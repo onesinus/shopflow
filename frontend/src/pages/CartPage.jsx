@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { cartApi } from '../api/cart';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import Price from '../components/Price';
 import Spinner from '../components/Spinner';
 
 export default function CartPage() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { refresh: refreshCart } = useCart();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +35,7 @@ export default function CartPage() {
     try {
       await cartApi.updateItem(item.id, qty);
       load();
+      refreshCart();
     } catch (err) {
       toast(err.message, 'error');
     }
@@ -42,6 +45,7 @@ export default function CartPage() {
     try {
       await cartApi.removeItem(itemId);
       load();
+      refreshCart();
     } catch (err) {
       toast(err.message, 'error');
     }

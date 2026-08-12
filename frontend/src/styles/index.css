@@ -169,6 +169,15 @@ code {
   color: #92400e;
 }
 
+.badge-cart {
+  display: inline-block;
+  margin-left: 6px;
+  background: var(--primary);
+  color: #fff;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
