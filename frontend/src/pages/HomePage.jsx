@@ -17,6 +17,11 @@ export default function HomePage() {
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
   const page = Number(searchParams.get('page') || 1);
+  const [query, setQuery] = useState(q);
+
+  useEffect(() => {
+    setQuery(q);
+  }, [q]);
 
   useEffect(() => {
     categoriesApi
@@ -66,7 +71,8 @@ export default function HomePage() {
           className="search-input"
           type="search"
           placeholder="Search products…"
-          defaultValue={q}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') updateParam('q', e.target.value.trim());
           }}
