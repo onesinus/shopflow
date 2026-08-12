@@ -1,6 +1,7 @@
 const catalogService = require('../services/catalogService');
 const productService = require('../services/productService');
 const reviewService = require('../services/reviewService');
+const ApiError = require('../utils/ApiError');
 const { ok, created } = require('../utils/response');
 const { buildMeta } = require('../utils/paginate');
 const asyncHandler = require('../utils/asyncHandler');
@@ -13,7 +14,7 @@ const list = asyncHandler(async (req, res) => {
 const detail = asyncHandler(async (req, res) => {
   const product = await productService.getProductById(req.params.id);
   if (!product) {
-    return res.status(200).json({ data: null });
+    throw ApiError.notFound('Product not found');
   }
   return ok(res, product);
 });
@@ -44,6 +45,11 @@ const createVariant = asyncHandler(async (req, res) => {
   return created(res, variant);
 });
 
+const related = asyncHandler(async (req, res) => {
+  const products = await productService.getRelatedProducts(req.params.id, Number(req.query.limit) || 6);
+  return ok(res, products);
+});
+
 const listReviews = asyncHandler(async (req, res) => {
   const result = await reviewService.listByProduct(req.params.id, req.query);
   return ok(res, result.rows, {
@@ -57,4 +63,4 @@ const createReview = asyncHandler(async (req, res) => {
   return created(res, review);
 });
 
-module.exports = { list, detail, bySlug, create, update, remove, createVariant, listReviews, createReview };
+module.exports = { list, detail, bySlug, create, update, remove, createVariant, listReviews, createReview, related };

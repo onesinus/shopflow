@@ -7,6 +7,7 @@ const productController = require('../controllers/productController');
 router.get('/', productController.list);
 router.get('/slug/:slug', productController.bySlug);
 router.get('/:id/reviews', productController.listReviews);
+router.get('/:id/related', productController.related);
 router.get('/:id', productController.detail);
 
 router.post(

@@ -106,6 +106,7 @@ passwords both return `401` with the same message.
 | GET    | /products                     | 🔓     | List/search/filter products       |
 | GET    | /products/slug/:slug          | 🔓     | Product detail by slug            |
 | GET    | /products/:id                 | 🔓     | Product detail by id              |
+| GET    | /products/:id/related         | 🔓     | Related products (max 6)          |
 | GET    | /products/:id/reviews         | 🔓     | Reviews for a product             |
 | GET    | /categories                   | 🔓     | Active categories                 |
 | GET    | /categories/:slug/products    | 🔓     | Products in a category            |
@@ -125,6 +126,18 @@ Query params:
 | `limit`    | Page size (default 10, max 100)                |
 
 Response items include `category` and `inventory` associations.
+
+### GET /products/:id/related
+
+Returns up to 6 active products sharing a category, brand or co-purchase history
+with the requested product, ordered by relevance. The requested product itself
+is never included. Query param `limit` overrides the default of 6.
+
+```json
+{ "data": [ { "id": 3, "name": "USB-C Hub", "priceCents": 3500 } ] }
+```
+
+Returns `404` when the product id does not exist.
 
 ---
 

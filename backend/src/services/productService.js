@@ -75,6 +75,7 @@ async function updateProduct(id, data, options = {}) {
 
   const before = product.toJSON();
   await product.update(patch);
+  cache.del(`product:${id}`);
 
   await writeAudit({
     actorUserId: options.actorId,
@@ -127,6 +128,7 @@ async function createVariant(productId, data, options = {}) {
     quantity: data.stock !== undefined ? data.stock : 0,
     lowStockThreshold: 5,
   });
+  cache.del(`product:${productId}`);
 
   await writeAudit({
     actorUserId: options.actorId,
@@ -137,6 +139,66 @@ async function createVariant(productId, data, options = {}) {
   });
 
   return variant;
+}
+
+async function getRelatedProducts(productId, limit = 6) {
+  const product = await models.Product.findByPk(productId);
+  if (!product) throw ApiError.notFound('Product not found');
+
+  const candidates = [];
+
+  if (product.categoryId) {
+    const sameCategory = await models.Product.findAll({
+      where: { categoryId: product.categoryId, isActive: true, id: { [Op.ne]: product.id } },
+      attributes: ['id'],
+      limit,
+    });
+    sameCategory.forEach((p) => candidates.push(p.id));
+  }
+
+  if (product.brand) {
+    const sameBrand = await models.Product.findAll({
+      where: { brand: product.brand, isActive: true, id: { [Op.ne]: product.id } },
+      attributes: ['id'],
+      limit,
+    });
+    sameBrand.forEach((p) => candidates.push(p.id));
+  }
+
+  const orderRows = await models.OrderItem.findAll({
+    where: { productId: product.id },
+    attributes: ['orderId'],
+  });
+  if (orderRows.length) {
+    const orderIds = [...new Set(orderRows.map((r) => r.orderId))];
+    const coPurchased = await models.OrderItem.findAll({
+      where: { orderId: { [Op.in]: orderIds }, productId: { [Op.ne]: product.id } },
+      attributes: ['productId'],
+      limit: 50,
+    });
+    coPurchased.forEach((r) => candidates.push(r.productId));
+  }
+
+  const counts = {};
+  for (const id of candidates) counts[id] = (counts[id] || 0) + 1;
+
+  const rankedIds = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([id]) => Number(id));
+
+  if (!rankedIds.length) return [];
+
+  const related = await models.Product.findAll({
+    where: { id: { [Op.in]: rankedIds }, isActive: true },
+    include: [
+      { model: models.Category, as: 'category' },
+      { model: models.Inventory, as: 'inventory' },
+    ],
+  });
+
+  const byId = new Map(related.map((p) => [p.id, p]));
+  return rankedIds.map((id) => byId.get(id)).filter(Boolean);
 }
 
 async function listLowStock(query) {
@@ -152,4 +214,12 @@ async function listLowStock(query) {
   return { rows, count, page, limit };
 }
 
-module.exports = { getProductById, createProduct, updateProduct, deleteProduct, createVariant, listLowStock };
+module.exports = {
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVariant,
+  listLowStock,
+  getRelatedProducts,
+};

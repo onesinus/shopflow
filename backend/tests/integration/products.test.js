@@ -58,6 +58,42 @@ describe('GET /api/v1/products', () => {
   });
 });
 
+describe('GET /api/v1/products/:id/related', () => {
+  beforeEach(async () => {
+    await resetDb();
+    await seedRoles();
+  });
+
+  it('returns related products sharing a category or brand', async () => {
+    const category = await createCategory();
+    const a = await createProduct(category.id, { sku: 'R-1', name: 'Alpha', brand: 'Acme' });
+    const b = await createProduct(category.id, { sku: 'R-2', name: 'Beta', brand: 'Acme' });
+    const c = await createProduct(category.id, { sku: 'R-3', name: 'Gamma', brand: 'Other' });
+
+    const res = await request(app).get(`/api/v1/products/${a.id}/related`);
+
+    expect(res.status).toBe(200);
+    const ids = res.body.data.map((p) => p.id);
+    expect(ids).not.toContain(a.id);
+    expect(ids).toEqual(expect.arrayContaining([b.id, c.id]));
+    expect(ids.length).toBeLessThanOrEqual(6);
+  });
+
+  it('never includes the requested product itself', async () => {
+    const category = await createCategory();
+    const only = await createProduct(category.id, { sku: 'R-4', name: 'Only' });
+
+    const res = await request(app).get(`/api/v1/products/${only.id}/related`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(0);
+  });
+
+  it('returns 404 when the product does not exist', async () => {
+    const res = await request(app).get('/api/v1/products/999999/related');
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('GET /api/v1/products/:id', () => {
   beforeEach(async () => {
     await resetDb();

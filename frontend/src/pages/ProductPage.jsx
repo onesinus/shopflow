@@ -29,11 +29,8 @@ export default function ProductPage() {
       .then((p) => {
         setProduct(p);
         setVariantId(p.variants?.length ? p.variants[0].id : null);
-        if (p.categoryId) {
-          return productsApi
-            .list({ category: p.categoryId, limit: 5 })
-            .then((result) => result.data.filter((x) => x.id !== p.id).slice(0, 4))
-            .catch(() => []);
+        if (p.id) {
+          return productsApi.getRelated(p.id).catch(() => []);
         }
         return [];
       })

@@ -17,6 +17,9 @@ export const productsApi = {
   getBySlug(slug) {
     return api.get(`/products/slug/${slug}`);
   },
+  getRelated(id, limit = 6) {
+    return api.get(`/products/${id}/related?limit=${limit}`);
+  },
 };
 
 export const categoriesApi = {
