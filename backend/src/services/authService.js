@@ -111,7 +111,7 @@ async function forgotPassword({ email }) {
 }
 
 async function resetPassword({ token, password }) {
-  const record = await models.PasswordReset.findOne({ where: { tokenHash: token } });
+  const record = await models.PasswordReset.findOne({ where: { tokenHash: hashToken(token) } });
   if (!record) throw ApiError.badRequest('Invalid or expired reset token');
   if (record.usedAt) throw ApiError.badRequest('This reset link has already been used');
   if (record.expiresAt.getTime() < Date.now()) throw ApiError.badRequest('This reset link has expired');

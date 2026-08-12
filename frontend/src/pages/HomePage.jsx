@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { productsApi, categoriesApi } from '../api/products';
 import ProductCard from '../components/ProductCard';
+import Pagination from '../components/Pagination';
 import Spinner from '../components/Spinner';
 
 const PAGE_SIZE = 12;
@@ -54,6 +55,14 @@ export default function HomePage() {
     setSearchParams(next);
   };
 
+  const goToPage = (nextPage) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const next = new URLSearchParams(searchParams);
+    if (nextPage > 1) next.set('page', String(nextPage));
+    else next.delete('page');
+    setSearchParams(next);
+  };
+
   return (
     <div className="container">
       <section className="hero">
@@ -99,27 +108,7 @@ export default function HomePage() {
           {!products.length && <p className="empty">No products found. Try a different search.</p>}
 
           {meta && meta.totalPages > 1 && (
-            <div className="pagination">
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                disabled={page <= 1}
-                onClick={() => updateParam('page', String(page - 1))}
-              >
-                Previous
-              </button>
-              <span>
-                Page {meta.page} of {meta.totalPages}
-              </span>
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                disabled={page >= meta.totalPages}
-                onClick={() => updateParam('page', String(page + 1))}
-              >
-                Next
-              </button>
-            </div>
+            <Pagination page={page} totalPages={meta.totalPages} onChange={goToPage} />
           )}
         </>
       )}

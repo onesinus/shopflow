@@ -397,8 +397,13 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   margin-top: 28px;
+}
+
+.pagination-gap {
+  color: var(--muted);
+  padding: 0 2px;
 }
 
 /* Alerts + cards */
