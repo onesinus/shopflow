@@ -12,6 +12,7 @@ const Product = sequelize.define(
     priceCents: { type: DataTypes.INTEGER, allowNull: false, field: 'price_cents' },
     categoryId: { type: DataTypes.INTEGER, allowNull: true, field: 'category_id' },
     brand: { type: DataTypes.STRING(100) },
+    imageUrl: { type: DataTypes.STRING(500), allowNull: true, field: 'image_url' },
     isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true, field: 'is_active' },
     featured: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   },

@@ -4,6 +4,9 @@ const { requireAuth } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const orderController = require('../controllers/orderController');
 
+// Legacy contract: the partner dashboard still calls this without auth.
+router.get('/count', orderController.count);
+
 router.use(requireAuth);
 
 router.post(

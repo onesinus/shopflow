@@ -74,4 +74,33 @@ describe('/api/v1/admin', () => {
     const res = await request(app).get('/api/v1/admin/users').set(auth(custToken));
     expect(res.status).toBe(403);
   });
+
+  it('uploads and replaces a product image', async () => {
+    const staff = await createUser({ email: 'img@example.com', roleId: 2 });
+    const staffToken = await loginAs(staff.email);
+    const category = await createCategory();
+    const product = await createProduct(category.id, { sku: 'IMG-1' });
+
+    const res = await request(app)
+      .post(`/api/v1/admin/products/${product.id}/image`)
+      .set(auth(staffToken))
+      .attach('image', Buffer.from('fake-image-bytes'), { filename: 'pic.png', contentType: 'image/png' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.imageUrl).toMatch(/^\/uploads\//);
+  });
+
+  it('rejects a non-image upload', async () => {
+    const staff = await createUser({ email: 'img2@example.com', roleId: 2 });
+    const staffToken = await loginAs(staff.email);
+    const category = await createCategory();
+    const product = await createProduct(category.id, { sku: 'IMG-2' });
+
+    const res = await request(app)
+      .post(`/api/v1/admin/products/${product.id}/image`)
+      .set(auth(staffToken))
+      .attach('image', Buffer.from('not an image'), { filename: 'note.txt', contentType: 'text/plain' });
+
+    expect(res.status).toBe(400);
+  });
 });

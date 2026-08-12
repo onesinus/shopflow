@@ -20,10 +20,12 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [variantId, setVariantId] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setImageFailed(false);
     productsApi
       .getBySlug(slug)
       .then((p) => {
@@ -84,7 +86,11 @@ export default function ProductPage() {
       <div className="product-detail">
         <div className="product-detail-media">
           <div className="product-card-image large">
-            <span className="placeholder">SF</span>
+            {!imageFailed && product.imageUrl ? (
+              <img src={product.imageUrl} alt={product.name} onError={() => setImageFailed(true)} />
+            ) : (
+              <span className="placeholder">SF</span>
+            )}
           </div>
         </div>
 

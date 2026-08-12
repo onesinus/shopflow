@@ -28,6 +28,7 @@ router.patch(
 );
 
 router.get('/products/low-stock', requireStaffOrAdmin, adminController.lowStock);
+router.post('/products/:productId/image', requireStaffOrAdmin, adminController.uploadProductImage);
 
 router.post(
   '/coupons',

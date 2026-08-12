@@ -29,6 +29,17 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleImageChange = async (product, file) => {
+    if (!file) return;
+    try {
+      await adminApi.uploadProductImage(product.id, file);
+      toast('Image uploaded', 'success');
+      load();
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  };
+
   if (error) return <div className="alert alert-error">{error}</div>;
   if (!products) return <Spinner />;
 
@@ -54,6 +65,7 @@ export default function AdminProductsPage() {
       <table className="table">
         <thead>
           <tr>
+            <th>Image</th>
             <th>SKU</th>
             <th>Name</th>
             <th>Price</th>
@@ -64,6 +76,23 @@ export default function AdminProductsPage() {
         <tbody>
           {products.map((p) => (
             <tr key={p.id}>
+              <td>
+                <div className="admin-thumb">
+                  {p.imageUrl ? (
+                    <img src={p.imageUrl} alt={p.name} />
+                  ) : (
+                    <span className="placeholder">SF</span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="admin-thumb-input"
+                    title="Upload image"
+                    aria-label={`Upload image for ${p.name}`}
+                    onChange={(e) => handleImageChange(p, e.target.files[0])}
+                  />
+                </div>
+              </td>
               <td>{p.sku}</td>
               <td>{p.name}</td>
               <td>

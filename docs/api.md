@@ -133,7 +133,7 @@ Response items include `category` and `inventory` associations.
 | Method | Path                    | Access | Description              |
 | ------ | ----------------------- | ------ | ------------------------ |
 | POST   | /products               | 🛡️     | Create a product + inventory row |
-| PATCH  | /products/:id           | 🛡️     | Update product fields    |
+| PATCH  | /products/:id           | 🛡️     | Update product fields (incl. `imageUrl`) |
 | DELETE | /products/:id           | 🛡️     | Delete a product         |
 | POST   | /products/:id/variants  | 🛡️     | Add a variant + inventory|
 
@@ -237,7 +237,14 @@ Returns the created order with `items`, `payment`, `address` and `coupon`.
 | GET    | /admin/orders                  | 🛡️     | List all orders                    |
 | PATCH  | /admin/orders/:orderId/status  | 🛡️     | Update order status                |
 | GET    | /admin/products/low-stock      | 🛡️     | Products at/below low-stock threshold |
+| POST   | /admin/products/:productId/image | 🛡️   | Upload/replace a product image (multipart, `image` field) |
 | POST   | /admin/coupons                 | ⚑      | Create a coupon                    |
+
+### POST /admin/products/:productId/image
+
+Accepts a multipart form with an `image` file field (max 5 MB, `image/*`).
+On success the product's `imageUrl` is set to `/uploads/<file>` and the updated
+product is returned. Requires staff or admin.
 
 ### Order status values
 

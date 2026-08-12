@@ -42,6 +42,7 @@ async function createProduct(data, options = {}) {
     priceCents: data.priceCents,
     categoryId: data.categoryId || null,
     brand: data.brand || null,
+    imageUrl: data.imageUrl || null,
     featured: data.featured === true,
     isActive: true,
   });
@@ -69,12 +70,13 @@ async function updateProduct(id, data, options = {}) {
   if (!product) throw ApiError.notFound('Product not found');
 
   const patch = {};
-  ['name', 'description', 'priceCents', 'categoryId', 'brand', 'featured', 'isActive'].forEach((key) => {
+  ['name', 'description', 'priceCents', 'categoryId', 'brand', 'featured', 'isActive', 'imageUrl'].forEach((key) => {
     if (data[key] !== undefined) patch[key] = data[key];
   });
 
   const before = product.toJSON();
   await product.update(patch);
+  cache.del(`product:${id}`);
 
   await writeAudit({
     actorUserId: options.actorId,
@@ -127,6 +129,7 @@ async function createVariant(productId, data, options = {}) {
     quantity: data.stock !== undefined ? data.stock : 0,
     lowStockThreshold: 5,
   });
+  cache.del(`product:${productId}`);
 
   await writeAudit({
     actorUserId: options.actorId,

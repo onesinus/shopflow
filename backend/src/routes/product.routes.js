@@ -31,6 +31,7 @@ router.patch(
     body('priceCents').optional().isInt({ min: 1 }),
     body('featured').optional().isBoolean(),
     body('isActive').optional().isBoolean(),
+    body('imageUrl').optional().isURL({ require_protocol: false }).withMessage('imageUrl must be a valid URL'),
   ]),
   productController.update
 );

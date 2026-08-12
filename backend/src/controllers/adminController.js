@@ -1,11 +1,39 @@
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const adminService = require('../services/adminService');
 const userService = require('../services/userService');
 const orderService = require('../services/orderService');
 const productService = require('../services/productService');
 const { ok } = require('../utils/response');
 const { buildMeta } = require('../utils/paginate');
+const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { models } = require('../models');
+
+const uploadDir = path.resolve(__dirname, '../../public/uploads');
+
+const productImageStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    cb(null, `product-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
+});
+
+const uploadProductImageMiddleware = multer({
+  storage: productImageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(ApiError.badRequest('Only image files are allowed'));
+    }
+    return cb(null, true);
+  },
+}).single('image');
 
 const dashboardStats = asyncHandler(async (req, res) => {
   const stats = await adminService.getDashboardStats();
@@ -71,6 +99,24 @@ const createCoupon = asyncHandler(async (req, res) => {
   return res.status(201).json({ data: coupon });
 });
 
+const uploadProductImage = (req, res, next) => {
+  uploadProductImageMiddleware(req, res, async (err) => {
+    if (err) return next(err);
+    try {
+      const product = await models.Product.findByPk(req.params.productId);
+      if (!product) throw ApiError.notFound('Product not found');
+      if (!req.file) throw ApiError.badRequest('No image file provided');
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+      await product.update({ imageUrl });
+
+      return ok(res, product);
+    } catch (uploadErr) {
+      return next(uploadErr);
+    }
+  });
+};
+
 module.exports = {
   dashboardStats,
   salesReport,
@@ -82,4 +128,5 @@ module.exports = {
   updateOrderStatus,
   lowStock,
   createCoupon,
+  uploadProductImage,
 };

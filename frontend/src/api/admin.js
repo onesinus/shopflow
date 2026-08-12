@@ -14,6 +14,11 @@ export const adminApi = {
   updateProduct(id, payload) {
     return api.patch(`/products/${id}`, payload, { auth: true });
   },
+  uploadProductImage(id, file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.upload(`/admin/products/${id}/image`, formData, { auth: true });
+  },
   listOrders(params = {}) {
     const search = new URLSearchParams(params);
     return api.get(`/admin/orders?${search.toString()}`, { auth: true });

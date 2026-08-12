@@ -71,4 +71,20 @@ export const api = {
   put: (path, body, opts) => request(path, { method: 'PUT', body, ...opts }),
   patch: (path, body, opts) => request(path, { method: 'PATCH', body, ...opts }),
   delete: (path, opts) => request(path, { method: 'DELETE', ...opts }),
+  upload: async (path, formData, opts = {}) => {
+    const headers = {};
+    const token = getAccessToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: opts.method || 'POST',
+      headers,
+      body: formData,
+    });
+    const payload = await parseBody(response);
+    if (!response.ok) {
+      const message = payload?.error?.message || `Request failed (${response.status})`;
+      throw new ApiError(response.status, message, payload);
+    }
+    return payload?.data ?? payload;
+  },
 };
