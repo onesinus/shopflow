@@ -82,6 +82,28 @@ describe('/api/v1/orders', () => {
     expect(list.body.data.length).toBe(1);
   });
 
+  it('blocks checkout for an unverified email', async () => {
+    const user = await createUser({ emailVerifiedAt: null });
+    const token = await loginAs(user.email);
+    const category = await createCategory();
+    const product = await createProduct(category.id, { sku: 'O-V', priceCents: 1000 });
+    await createInventory(product.id, 5);
+    const address = await models.Address.create({
+      userId: user.id,
+      firstName: 'A',
+      lastName: 'B',
+      line1: '5 Main St',
+      city: 'Portland',
+      country: 'US',
+    });
+
+    await request(app).post('/api/v1/cart/items').set(auth(token)).send({ productId: product.id, quantity: 1 });
+    const res = await request(app).post('/api/v1/orders').set(auth(token)).send({ addressId: address.id });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error.message).toMatch(/verify your email/i);
+  });
+
   it('does not leak another users order through the detail endpoint', async () => {
     const alice = await createUser({ email: 'alice@example.com' });
     const aliceToken = await loginAs(alice.email);

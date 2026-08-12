@@ -26,6 +26,15 @@ const mailer = {
     });
   },
 
+  sendEmailVerification(user, token) {
+    const link = `${config.webBaseUrl}/verify?token=${token}`;
+    return send({
+      to: user.email,
+      subject: 'Verify your ShopFlow email',
+      html: `<p>Hi ${user.firstName},</p><p>Confirm your email address to enable checkout:</p><p><a href="${link}">${link}</a></p><p>This link expires in 24 hours.</p>`,
+    });
+  },
+
   sendPasswordReset(user, token) {
     const link = `${config.webBaseUrl}/reset-password?token=${token}`;
     return send({

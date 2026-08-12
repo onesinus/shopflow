@@ -30,6 +30,7 @@ module.exports = {
         phone: '+1 415 555 0100',
         roleId: roleIdByName.admin,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'staff@shopflow.test',
@@ -39,6 +40,7 @@ module.exports = {
         phone: '+1 415 555 0101',
         roleId: roleIdByName.staff,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'customer@shopflow.test',
@@ -48,6 +50,7 @@ module.exports = {
         phone: '+1 415 555 0102',
         roleId: roleIdByName.customer,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'sam@example.com',
@@ -57,6 +60,7 @@ module.exports = {
         phone: '+1 415 555 0103',
         roleId: roleIdByName.customer,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'tara@example.com',
@@ -66,6 +70,7 @@ module.exports = {
         phone: '+1 415 555 0104',
         roleId: roleIdByName.customer,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'leo@example.com',
@@ -75,6 +80,7 @@ module.exports = {
         phone: '+1 415 555 0105',
         roleId: roleIdByName.customer,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         // Account created before the profile migration - no Profile row exists.
@@ -85,6 +91,7 @@ module.exports = {
         phone: '+1 415 555 0106',
         roleId: roleIdByName.customer,
         status: 'active',
+        emailVerifiedAt: new Date(),
       },
       {
         email: 'dormant@example.com',
@@ -94,6 +101,7 @@ module.exports = {
         phone: '+1 415 555 0107',
         roleId: roleIdByName.customer,
         status: 'disabled',
+        emailVerifiedAt: new Date(),
       },
     ];
 

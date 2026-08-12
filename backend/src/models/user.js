@@ -23,6 +23,7 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: 'active',
     },
+    emailVerifiedAt: { type: DataTypes.DATE, allowNull: true, field: 'email_verified_at' },
   },
   {
     tableName: 'users',
@@ -52,6 +53,7 @@ User.associate = function (models) {
   User.hasMany(models.WishlistItem, { foreignKey: 'userId', as: 'wishlist' });
   User.hasMany(models.Notification, { foreignKey: 'userId', as: 'notifications' });
   User.hasMany(models.PasswordReset, { foreignKey: 'userId', as: 'passwordResets' });
+  User.hasMany(models.EmailVerification, { foreignKey: 'userId', as: 'emailVerifications' });
   User.hasMany(models.CouponRedemption, { foreignKey: 'userId', as: 'couponRedemptions' });
   User.hasMany(models.AuditLog, { foreignKey: 'actorUserId', as: 'auditLogs' });
 };

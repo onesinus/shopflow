@@ -66,6 +66,58 @@ describe('POST /api/v1/auth', () => {
     });
   });
 
+  describe('email verification', () => {
+    it('registers new accounts as unverified', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/register')
+        .send({ email: 'unverified@example.com', firstName: 'N', lastName: 'U', password: 'Password123!' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.emailVerified).toBe(false);
+    });
+
+    it('verifies an email with a valid token', async () => {
+      const user = await createUser({ email: 'verify@example.com', emailVerifiedAt: null });
+      const raw = crypto.randomBytes(32).toString('hex');
+      await models.EmailVerification.create({
+        userId: user.id,
+        tokenHash: crypto.createHash('sha256').update(raw).digest('hex'),
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      });
+
+      const res = await request(app).get(`/api/v1/auth/verify/${raw}`);
+      expect(res.status).toBe(200);
+
+      await user.reload();
+      expect(user.emailVerifiedAt).toBeTruthy();
+    });
+
+    it('rejects an expired verification token', async () => {
+      const user = await createUser({ email: 'verify2@example.com', emailVerifiedAt: null });
+      const raw = crypto.randomBytes(32).toString('hex');
+      await models.EmailVerification.create({
+        userId: user.id,
+        tokenHash: crypto.createHash('sha256').update(raw).digest('hex'),
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      const res = await request(app).get(`/api/v1/auth/verify/${raw}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('resends a verification email', async () => {
+      const user = await createUser({ email: 'verify3@example.com', emailVerifiedAt: null });
+
+      const res = await request(app)
+        .post('/api/v1/auth/resend-verification')
+        .send({ email: 'verify3@example.com' });
+
+      expect(res.status).toBe(200);
+      const count = await models.EmailVerification.count({ where: { userId: user.id } });
+      expect(count).toBe(1);
+    });
+  });
+
   describe('password reset', () => {
     it('resets the password with a valid token', async () => {
       const user = await createUser({ email: 'reset@example.com' });

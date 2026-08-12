@@ -17,7 +17,7 @@ async function seedRoles() {
 }
 
 async function createUser(overrides = {}) {
-  const { withProfile = true, ...userFields } = overrides;
+  const { withProfile = true, emailVerifiedAt = new Date(), ...userFields } = overrides;
   const user = await models.User.create({
     email: `user_${Math.random().toString(36).slice(2, 10)}@example.com`,
     passwordHash: 'Password123!',
@@ -25,6 +25,7 @@ async function createUser(overrides = {}) {
     lastName: 'User',
     roleId: 3,
     status: 'active',
+    emailVerifiedAt,
     ...userFields,
   });
   if (withProfile) {

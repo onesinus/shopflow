@@ -7,8 +7,9 @@ const authController = require('../controllers/authController');
 const emailRule = body('email')
   .notEmpty()
   .withMessage('Email is required')
-  .custom((value) => /.+@.+/.test(value))
-  .withMessage('A valid email is required');
+  .isEmail()
+  .withMessage('A valid email is required')
+  .normalizeEmail();
 
 const passwordRule = body('password')
   .isLength({ min: 6 })
@@ -42,6 +43,15 @@ router.post(
 );
 
 router.post('/logout', authController.logout);
+
+router.get('/verify/:token', authController.verifyEmail);
+
+router.post(
+  '/resend-verification',
+  rateLimit({ windowMs: 60 * 60 * 1000, max: 5 }),
+  validate([body('email').isEmail().withMessage('A valid email is required')]),
+  authController.resendVerification
+);
 
 router.post(
   '/forgot-password',

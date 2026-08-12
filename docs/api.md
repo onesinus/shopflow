@@ -61,6 +61,8 @@ Roles: `admin`, `staff`, `customer`. Route markers below:
 | POST   | /auth/login              | 🔓     | Exchange credentials for tokens      |
 | POST   | /auth/refresh            | 🔓     | Refresh an expired access token      |
 | POST   | /auth/logout             | 👤     | Discard a refresh token (client-side)|
+| GET    | /auth/verify/:token      | 🔓     | Verify an email with the emailed token |
+| POST   | /auth/resend-verification| 🔓     | Resend the verification email (rate limited) |
 | POST   | /auth/forgot-password    | 🔓     | Send a reset token by email          |
 | POST   | /auth/reset-password     | 🔓     | Set a new password using a token     |
 
@@ -79,7 +81,21 @@ Returns the created user without `passwordHash`.
 ```
 
 Returns `{ accessToken, refreshToken, user }`. Unknown emails and wrong
-passwords both return `401` with the same message.
+passwords both return `401` with the same message. `user.emailVerified` reflects
+whether the account's email has been verified.
+
+### GET /auth/verify/:token
+
+Marks the account's email as verified using the token emailed at registration.
+Returns `400` for an invalid, expired or already-used token.
+
+### POST /auth/resend-verification
+
+```json
+{ "email": "user@example.com" }
+```
+
+Sends a fresh verification email. Rate limited to 5 per hour per address.
 
 ---
 
@@ -179,6 +195,8 @@ Cart responses include `subtotalCents`, `shippingCents`, `taxCents`,
 | GET    | /orders              | Current user's orders            |
 | GET    | /orders/:orderId     | Order detail                     |
 | POST   | /orders/:orderId/cancel | Cancel a pending/paid order   |
+
+Checkout requires a **verified email** — unverified accounts receive `403`.
 
 ### POST /orders
 
