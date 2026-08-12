@@ -1,6 +1,7 @@
 const catalogService = require('../services/catalogService');
 const productService = require('../services/productService');
 const reviewService = require('../services/reviewService');
+const ApiError = require('../utils/ApiError');
 const { ok, created } = require('../utils/response');
 const { buildMeta } = require('../utils/paginate');
 const asyncHandler = require('../utils/asyncHandler');
@@ -13,7 +14,7 @@ const list = asyncHandler(async (req, res) => {
 const detail = asyncHandler(async (req, res) => {
   const product = await productService.getProductById(req.params.id);
   if (!product) {
-    return res.status(200).json({ data: null });
+    throw ApiError.notFound('Product not found');
   }
   return ok(res, product);
 });
