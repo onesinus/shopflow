@@ -1,6 +1,10 @@
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 
+function escapeLike(value) {
+  return String(value).replace(/[\\%_]/g, (match) => `\\${match}`);
+}
+
 function buildSearchWhere(query) {
   const where = { is_active: true };
 
@@ -26,13 +30,9 @@ function buildSearchWhere(query) {
   return where;
 }
 
-function escapeLike(value) {
-  return String(value).replace(/[\\%_]/g, (match) => `\\${match}`);
-}
-
 function searchClause(q) {
   const escaped = escapeLike(q.toLowerCase()).replace(/'/g, "''");
   return sequelize.literal(`LOWER("Product"."name") LIKE '%${escaped}%' ESCAPE '\\'`);
 }
 
-module.exports = { buildSearchWhere, searchClause };
+module.exports = { buildSearchWhere, searchClause, escapeLike };
