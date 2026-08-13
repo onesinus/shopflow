@@ -174,6 +174,14 @@ export default function ProductPage() {
               'No description available.'}
           </p>
 
+          {stock !== undefined && (
+            <div className="stock-meta">
+              <span className={`stock-chip ${stock > 0 ? 'in' : 'out'}`}>
+                {stock > 0 ? (stock <= 5 ? `Only ${stock} left` : `${stock} in stock`) : 'Out of stock'}
+              </span>
+            </div>
+          )}
+
           {product.variants?.length > 0 && (
             <div className="variant-group">
               <label htmlFor="variant">

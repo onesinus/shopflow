@@ -90,6 +90,7 @@ export default function CartPage() {
                   <strong>{item.product?.name}</strong>
                   {item.variant && <span className="muted">{item.variant.name}</span>}
                   <Price cents={item.unitPriceCents} />
+                  {item.stock !== undefined && <span className="muted">Stock: {item.stock}</span>}
                 </div>
                 <div className="cart-line-qty">
                   <button
