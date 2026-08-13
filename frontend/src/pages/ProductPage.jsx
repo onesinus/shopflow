@@ -130,7 +130,7 @@ export default function ProductPage() {
       </div>
     );
   }
-  const selectedVariant = product.variants?.find((v) => v.id === variantId);
+  // const selectedVariant = product.variants?.find((v) => v.id === variantId);
   const hasVariants = (product.variants?.length ?? 0) > 0;
   const productStock = product.stock ?? product.inventory?.quantity ?? 0;
   const stock =
