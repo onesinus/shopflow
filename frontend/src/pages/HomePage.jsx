@@ -18,6 +18,12 @@ export default function HomePage() {
   const category = searchParams.get('category') || '';
   const page = Number(searchParams.get('page') || 1);
 
+  const [searchText, setSearchText] = useState(q);
+
+  useEffect(() => {
+    setSearchText(q);
+  }, [q]);
+
   useEffect(() => {
     categoriesApi
       .list()
@@ -66,7 +72,8 @@ export default function HomePage() {
           className="search-input"
           type="search"
           placeholder="Search products…"
-          defaultValue={q}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') updateParam('q', e.target.value.trim());
           }}

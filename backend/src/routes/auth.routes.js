@@ -7,7 +7,7 @@ const authController = require('../controllers/authController');
 const emailRule = body('email')
   .notEmpty()
   .withMessage('Email is required')
-  .custom((value) => /.+@.+/.test(value))
+  .isEmail()
   .withMessage('A valid email is required');
 
 const passwordRule = body('password')

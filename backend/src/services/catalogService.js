@@ -30,7 +30,13 @@ async function getProductBySlug(slug) {
     where: { slug, is_active: true },
     include: [
       { model: models.Category, as: 'category' },
-      { model: models.ProductVariant, as: 'variants', where: { is_active: true }, required: false },
+      {
+        model: models.ProductVariant,
+        as: 'variants',
+        where: { is_active: true },
+        required: false,
+        include: [{ model: models.Inventory, as: 'inventory' }],
+      },
       { model: models.Inventory, as: 'inventory' },
     ],
   });

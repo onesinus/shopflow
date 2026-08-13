@@ -1,0 +1,13 @@
+
+> @shopflow/api@0.9.0 seed
+> sequelize-cli db:seed:all
+
+
+[4mSequelize CLI [Node: 24.19.0, CLI: 6.6.5, ORM: 6.37.8][24m
+
+Loaded configuration file "src\config\sequelize-cli.js".
+Using environment "development".
+== 20250601000000-seed-roles-users: migrating =======
+
+[31mERROR:[39m Validation error
+
