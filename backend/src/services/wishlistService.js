@@ -22,14 +22,8 @@ async function addItem(userId, productId) {
 }
 
 async function removeItem(userId, productId) {
-  const removed = await models.WishlistItem.destroy({
-    where: {
-      userId,
-      productId,
-    },
-  });
-
-  return { removed: removed > 0 };
+  await models.WishlistItem.destroy({ where: { userId, productId } });
+  return { removed: true };
 }
 
 module.exports = { listWishlist, addItem, removeItem };

@@ -8,7 +8,8 @@ const emailRule = body('email')
   .notEmpty()
   .withMessage('Email is required')
   .isEmail()
-  .withMessage('A valid email is required');
+  .withMessage('A valid email is required')
+  .normalizeEmail();
 
 const passwordRule = body('password')
   .isLength({ min: 6 })

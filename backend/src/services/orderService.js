@@ -19,50 +19,7 @@ const { writeAudit } = require('../utils/audit');
 const { buildPagination } = require('../utils/paginate');
 const { Order, OrderItem, Inventory, sequelize } = require('../models');
 
-// async function cancelOrder(orderId, userId, userRole) {
-//   return await sequelize.transaction(async (transaction) => {
-//     // 1. Fetch order with items
-//     const order = await Order.findOne({
-//       where: { id: orderId },
-//       include: [{ model: OrderItem, as: 'items' }],
-//       transaction
-//     });
 
-//     if (!order) {
-//       throw new ApiError(404, 'Order not found');
-//     }
-
-//     // 2. Validate ownership & state
-//     if (userRole !== 'ADMIN' && order.user_id !== userId) {
-//       throw new ApiError(403, 'Unauthorized to cancel this order');
-//     }
-
-//     if (['SHIPPED', 'DELIVERED', 'CANCELLED'].includes(order.status)) {
-//       throw new ApiError(400, 'Order cannot be cancelled in its current status');
-//     }
-
-//     // 3. Return reserved items to inventory
-//     for (const item of order.items) {
-//       const inventory = await Inventory.findOne({
-//         where: { variant_id: item.variant_id },
-//         transaction
-//       });
-
-//       if (inventory) {
-//         await inventory.increment('quantity', {
-//           by: item.quantity,
-//           transaction
-//         });
-//       }
-//     }
-
-//     // 4. Update order status
-//     order.status = 'CANCELLED';
-//     await order.save({ transaction });
-
-//     return order;
-//   });
-// }
 
 function generateOrderNumber() {
   const suffix = Date.now().toString().slice(-8);
@@ -284,70 +241,21 @@ async function getUserOrder(userId, orderId) {
   return order;
 }
 
-/*async function cancelOrder(userId, orderId) {
-  const order = await models.Order.findOne({
-    where: {
-      id: orderId,
-      userId,
-    },
-  });
-
-  if (!order) {
-    throw ApiError.notFound('Order not found');
-  }
-
+async function cancelOrder(userId, orderId) {
+  const order = await models.Order.findOne({ where: { id: orderId, userId } });
+  if (!order) throw ApiError.notFound('Order not found');
   if (!['pending', 'paid'].includes(order.status)) {
-    throw ApiError.badRequest(
-      'This order can no longer be cancelled'
-    );
+    throw ApiError.badRequest('This order can no longer be cancelled');
   }
-
-  /*
-   * C02 FIX:
-   * Return the reserved stock back to inventory when
-   * an order is cancelled.
-*   */
-/*  const orderItems = await models.OrderItem.findAll({
-*    where: {
-*      orderId: order.id,
-*    },
-*  });
-*
-*  for (const item of orderItems) {
-*    const inventory = await inventoryFor(item);
-*
-*    if (inventory) {
-*      inventory.quantity += item.quantity;
-*      await inventory.save();
-*    }
-*  }
-*
-*  order.status = 'cancelled';
-*  order.paymentStatus = 'failed';
-*
-*  await order.save();
-*
-*  await notificationService.create(userId, {
-*    type: 'order_cancelled',
-*    title: 'Order cancelled',
-*    body: `Order ${order.orderNumber} was cancelled.`,
-*    link: `/orders/${order.orderNumber}`,
-*  });
-*
-*  return order;
-*}
-*/
-   */
-
+  
   const orderItems = await models.OrderItem.findAll({
     where: {
       orderId: order.id,
     },
   });
-
+  
   for (const item of orderItems) {
     const inventory = await inventoryFor(item);
-
     if (inventory) {
       inventory.quantity += item.quantity;
       await inventory.save();

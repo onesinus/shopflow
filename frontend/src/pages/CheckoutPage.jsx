@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cartApi } from '../api/cart';
 import { ordersApi, addressApi, couponsApi } from '../api/orders';
 import { useToast } from '../context/ToastContext';
-import { useCart } from '../context/CartContext';
-import Price from '../components/Price';
+import Price, { formatCents } from '../components/Price';
 import Spinner from '../components/Spinner';
 
 export default function CheckoutPage() {
@@ -52,6 +51,19 @@ export default function CheckoutPage() {
       toast(err.message, 'error');
     }
   };
+
+  const displayCart = useMemo(() => {
+    if (!cart || !coupon) return cart;
+    const discountCents =
+      coupon.discountType === 'percent'
+        ? Math.floor((cart.subtotalCents * coupon.discountValue) / 100)
+        : Math.min(coupon.discountValue, cart.subtotalCents);
+    return {
+      ...cart,
+      discountCents,
+      totalCents: Math.max(cart.subtotalCents - discountCents + cart.shippingCents + cart.taxCents, 0),
+    };
+  }, [cart, coupon]);
 
   const placeOrder = async () => {
     let addressId = Number(form.addressId);
@@ -185,25 +197,25 @@ export default function CheckoutPage() {
           <h2>Summary</h2>
           <div className="summary-row">
             <span>Subtotal</span>
-            <Price cents={cart.subtotalCents} />
+            <Price cents={displayCart.subtotalCents} />
           </div>
           {coupon && (
             <div className="summary-row">
               <span>Discount</span>
-              <span className="discount">−<Price cents={discountCents} /></span>
+              <span className="discount">−{formatCents(displayCart.discountCents)}</span>
             </div>
           )}
           <div className="summary-row">
             <span>Shipping</span>
-            <Price cents={cart.shippingCents} />
+            <Price cents={displayCart.shippingCents} />
           </div>
           <div className="summary-row">
             <span>Tax</span>
-            <Price cents={cart.taxCents} />
+            <Price cents={displayCart.taxCents} />
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <Price cents={totalCents} />
+            <Price cents={displayCart.totalCents} />
           </div>
           <button type="button" className="btn btn-primary btn-block" onClick={placeOrder} disabled={placing}>
             {placing ? 'Placing order…' : 'Place order'}
