@@ -258,8 +258,12 @@ async function listUserOrders(userId, query) {
   };
 }
 
-async function getOrderById(orderId) {
-  const order = await models.Order.findByPk(orderId, {
+async function getOrderById(orderId, userId, userRole) {
+  const order = await models.Order.findOne({
+  where: {
+    id: orderId,
+    userId,
+  },
     include: [
       { model: models.OrderItem, as: 'items' },
       { model: models.Payment, as: 'payment' },
@@ -273,9 +277,17 @@ async function getOrderById(orderId) {
   return order;
 }
 
-async function getUserOrder(orderId) {
+async function getUserOrder(orderId, userId, userRole) {
+  const where = {
+    id: orderId,
+  };
+
+  if (userRole !== 'ADMIN') {
+    where.userId = userId;
+  }
+
   const order = await models.Order.findOne({
-    where: { id: orderId },
+    where,
     include: [
       { model: models.OrderItem, as: 'items' },
       { model: models.Payment, as: 'payment' },

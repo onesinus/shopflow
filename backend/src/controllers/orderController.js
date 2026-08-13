@@ -14,7 +14,7 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const detail = asyncHandler(async (req, res) => {
-  const order = await orderService.getUserOrder(req.params.orderId);
+  const order = await orderService.getUserOrder(req.params.orderId, req.user.id, req.user.role);
   return ok(res, order);
 });
 
