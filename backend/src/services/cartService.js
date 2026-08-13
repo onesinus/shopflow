@@ -70,19 +70,16 @@ async function addItem(userId, { productId, variantId, quantity }) {
 
   const variantIdValue = variantId || null;
 
-  let item = await models.CartItem.findOne({ where: { cartId: cart.id, productId, variantId: variantIdValue } });
-  if (item) {
-    item.quantity += qty;
-    await item.save();
-  } else {
-    item = await models.CartItem.create({
-      cartId: cart.id,
-      productId,
-      variantId: variantIdValue,
-      quantity: qty,
-      unitPriceCents: unitPrice,
+ const [item, created] = await models.CartItem.findOrCreate({
+      where: { cartId: cart.id, productId, variantId: variantIdValue },
+      defaults: {
+        quantity: qty,
+        unitPriceCents: unitPrice,
+      },
     });
-  }
+    if (!created) {
+      await item.increment('quantity', { by: qty });
+    }
 
   return getCart(userId);
 }
