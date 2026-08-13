@@ -63,7 +63,7 @@ export default function HomePage() {
   return (
     <div className="container">
       <section className="hero">
-        <h1>Shop the everyday essentials</h1>
+        <h1>Shop the everyday essentials.</h1>
         <p>Free shipping over $50 on US orders. Demo catalog for the ShopFlow platform.</p>
       </section>
 
