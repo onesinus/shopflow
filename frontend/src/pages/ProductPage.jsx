@@ -130,8 +130,9 @@ export default function ProductPage() {
               min="1"
               max={stock || 99}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+              onChange={(e) => setQuantity(Math.min(Math.max(1, Number(e.target.value) || 1), Math.max(stock, 1)))}
             />
+            {outOfStock && <p className="muted">Out of stock</p>}
           </div>
 
           <div className="product-actions">

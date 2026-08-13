@@ -1,6 +1,7 @@
 const catalogService = require('../services/catalogService');
 const productService = require('../services/productService');
 const reviewService = require('../services/reviewService');
+const ApiError = require('../utils/ApiError');
 const { ok, created } = require('../utils/response');
 const { buildMeta } = require('../utils/paginate');
 const asyncHandler = require('../utils/asyncHandler');
