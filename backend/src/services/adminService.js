@@ -18,6 +18,12 @@ function toEndOfDay(value) {
   return date;
 }
 
+function toLocalDayKey(value) {
+  const d = new Date(value);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 async function getDashboardStats() {
   const today = formatDateLegacy(new Date());
 
@@ -84,7 +90,7 @@ async function getSalesReport({ from, to }) {
 
   const byDay = {};
   for (const order of orders) {
-    const day = formatDateLegacy(order.createdAt);
+    const day = toLocalDayKey(order.createdAt);
     byDay[day] = (byDay[day] || 0) + order.totalCents;
   }
 
