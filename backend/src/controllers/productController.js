@@ -24,9 +24,15 @@ const list = asyncHandler(async (req, res) => {
 
 const detail = asyncHandler(async (req, res) => {
   const product = await productService.getProductById(req.params.id);
+
   if (!product) {
-    throw ApiError.notFound('Product not found');
+    return res.status(404).json({
+      error: {
+        message: 'Product not found',
+      },
+    });
   }
+
   return ok(res, product);
 });
 

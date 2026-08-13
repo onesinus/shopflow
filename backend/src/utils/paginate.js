@@ -5,6 +5,7 @@ function buildPagination(query = {}) {
   const page = Math.max(parseInt(query.page, 10) || 1, 1);
   const limit = Math.min(parseInt(query.limit, 10) || DEFAULT_LIMIT, MAX_LIMIT);
   const offset = (page - 1) * limit;
+
   return { page, limit, offset };
 }
 

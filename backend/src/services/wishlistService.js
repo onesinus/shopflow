@@ -13,13 +13,23 @@ async function addItem(userId, productId) {
   const product = await models.Product.findByPk(productId);
   if (!product) throw ApiError.notFound('Product not found');
 
-  const [item] = await models.WishlistItem.findOrCreate({ where: { userId, productId } });
+  const [item] = await models.WishlistItem.findOrCreate({
+    where: { userId, productId },
+    defaults: { userId, productId },
+  });
+
   return item;
 }
 
 async function removeItem(userId, productId) {
-  await models.WishlistItem.destroy({ where: { userId, productId } });
-  return { removed: true };
+  const removed = await models.WishlistItem.destroy({
+    where: {
+      userId,
+      productId,
+    },
+  });
+
+  return { removed: removed > 0 };
 }
 
 module.exports = { listWishlist, addItem, removeItem };

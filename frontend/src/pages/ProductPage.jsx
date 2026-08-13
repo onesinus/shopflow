@@ -5,6 +5,7 @@ import { cartApi } from '../api/cart';
 import { wishlistApi } from '../api/cart';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import Price from '../components/Price';
 import Spinner from '../components/Spinner';
 
@@ -12,6 +13,7 @@ export default function ProductPage() {
   const { slug } = useParams();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { refresh: refreshCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
@@ -24,17 +26,24 @@ export default function ProductPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+
     productsApi
       .getBySlug(slug)
       .then((p) => {
         setProduct(p);
         setVariantId(p.variants?.length ? p.variants[0].id : null);
+
         if (p.categoryId) {
           return productsApi
             .list({ category: p.categoryId, limit: 5 })
-            .then((result) => result.data.filter((x) => x.id !== p.id).slice(0, 4))
+            .then((result) =>
+              result.data
+                .filter((x) => x.id !== p.id)
+                .slice(0, 4)
+            )
             .catch(() => []);
         }
+
         return [];
       })
       .then(setRelated)
@@ -42,11 +51,40 @@ export default function ProductPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  /*
+   * C09 FIX:
+   * Use the selected variant's stock when a variant is selected.
+   * Fall back to the product stock when there is no variant.
+   */
+  const selectedVariant = product?.variants?.find(
+    (v) => v.id === variantId
+  );
+
+  const selectedStock =
+    selectedVariant?.stock ?? product?.stock ?? 0;
+
   const handleAddToCart = async () => {
+    if (selectedStock <= 0) {
+      toast('This item is out of stock', 'error');
+      return;
+    }
+
+    if (quantity > selectedStock) {
+      toast(`Only ${selectedStock} item(s) available`, 'error');
+      return;
+    }
+
     setAdding(true);
+
     try {
-      await cartApi.addItem(product.id, quantity, variantId);
+      await cartApi.addItem(
+        product.id,
+        quantity,
+        variantId
+      );
+
       toast('Added to cart', 'success');
+      refreshCart();
     } catch (err) {
       toast(err.message, 'error');
     } finally {
@@ -56,9 +94,13 @@ export default function ProductPage() {
 
   const handleToggleWishlist = async () => {
     if (!isAuthenticated) {
-      toast('Sign in to save items to your wishlist', 'info');
+      toast(
+        'Sign in to save items to your wishlist',
+        'info'
+      );
       return;
     }
+
     try {
       await wishlistApi.add(product.id);
       toast('Saved to wishlist', 'success');
@@ -68,17 +110,42 @@ export default function ProductPage() {
   };
 
   if (loading) return <Spinner />;
-  if (error) return <div className="container"><div className="alert alert-error">{error}</div></div>;
-  if (!product) return <div className="container"><div className="alert alert-error">Product not found</div></div>;
 
-  const selectedVariant = product.variants?.find((v) => v.id === variantId);
+  if (error) {
+    return (
+      <div className="container">
+        <div className="alert alert-error">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="container">
+        <div className="alert alert-error">
+          Product not found
+        </div>
+      </div>
+    );
+  }
+  // const selectedVariant = product.variants?.find((v) => v.id === variantId);
+  const hasVariants = (product.variants?.length ?? 0) > 0;
+  const productStock = product.stock ?? product.inventory?.quantity ?? 0;
+  const stock =
+    hasVariants && selectedVariant
+      ? (selectedVariant.stock ?? selectedVariant.inventory?.quantity ?? 0)
+      : productStock;
 
   return (
     <div className="container">
       <nav className="breadcrumbs">
         <Link to="/">Catalog</Link>
         <span>/</span>
-        {product.category && <span>{product.category.name}</span>}
+        {product.category && (
+          <span>{product.category.name}</span>
+        )}
       </nav>
 
       <div className="product-detail">
@@ -90,23 +157,53 @@ export default function ProductPage() {
 
         <div className="product-detail-info">
           <h1>{product.name}</h1>
-          {product.sku && <p className="muted">SKU: {product.sku}</p>}
-          <Price cents={product.priceCents} className="price-lg" />
 
-          <p className="product-description">{product.description || 'No description available.'}</p>
+          {product.sku && (
+            <p className="muted">
+              SKU: {product.sku}
+            </p>
+          )}
+
+          <Price
+            cents={product.priceCents}
+            className="price-lg"
+          />
+
+          <p className="product-description">
+            {product.description ||
+              'No description available.'}
+          </p>
 
           {product.variants?.length > 0 && (
             <div className="variant-group">
-              <label htmlFor="variant">Option</label>
+              <label htmlFor="variant">
+                Option
+              </label>
+
               <select
                 id="variant"
                 className="select"
                 value={variantId ?? ''}
-                onChange={(e) => setVariantId(Number(e.target.value))}
+                onChange={(e) => {
+                  const newVariantId = Number(
+                    e.target.value
+                  );
+
+                  setVariantId(newVariantId);
+                  setQuantity(1);
+                }}
               >
                 {product.variants.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name} — {v.priceCents !== null ? <Price cents={v.priceCents} /> : 'default price'}
+                  <option
+                    key={v.id}
+                    value={v.id}
+                  >
+                    {v.name} —{' '}
+                    {v.priceCents !== null ? (
+                      <Price cents={v.priceCents} />
+                    ) : (
+                      'default price'
+                    )}
                   </option>
                 ))}
               </select>
@@ -114,14 +211,31 @@ export default function ProductPage() {
           )}
 
           <div className="qty-group">
-            <label htmlFor="qty">Quantity</label>
+            <label htmlFor="qty">
+              Quantity
+            </label>
+
             <input
               id="qty"
               type="number"
               min="1"
-              max={product.stock ?? 99}
+              max={selectedStock || 99}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+              onChange={(e) => {
+                const newQuantity = Math.max(
+                  1,
+                  Number(e.target.value) || 1
+                );
+
+                setQuantity(
+                  selectedStock > 0
+                    ? Math.min(
+                        newQuantity,
+                        selectedStock
+                      )
+                    : newQuantity
+                );
+              }}
             />
           </div>
 
@@ -130,11 +244,22 @@ export default function ProductPage() {
               type="button"
               className="btn btn-primary"
               onClick={handleAddToCart}
-              disabled={adding || product.stock === 0}
+              disabled={
+                adding || selectedStock === 0
+              }
             >
-              {product.stock === 0 ? 'Out of stock' : adding ? 'Adding…' : 'Add to cart'}
+              {selectedStock === 0
+                ? 'Out of stock'
+                : adding
+                  ? 'Adding…'
+                  : 'Add to cart'}
             </button>
-            <button type="button" className="btn btn-outline" onClick={handleToggleWishlist}>
+
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={handleToggleWishlist}
+            >
               ♡ Wishlist
             </button>
           </div>
@@ -144,14 +269,25 @@ export default function ProductPage() {
       {related.length > 0 && (
         <section className="related">
           <h2>You may also like</h2>
+
           <div className="product-grid">
             {related.map((p) => (
-              <Link key={p.id} to={`/products/${p.slug || p.id}`} className="product-card">
+              <Link
+                key={p.id}
+                to={`/products/${p.slug || p.id}`}
+                className="product-card"
+              >
                 <div className="product-card-image">
-                  <span className="placeholder">SF</span>
+                  <span className="placeholder">
+                    SF
+                  </span>
                 </div>
+
                 <div className="product-card-body">
-                  <h3 className="product-card-title">{p.name}</h3>
+                  <h3 className="product-card-title">
+                    {p.name}
+                  </h3>
+
                   <Price cents={p.priceCents} />
                 </div>
               </Link>

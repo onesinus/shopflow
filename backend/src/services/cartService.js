@@ -94,9 +94,7 @@ async function updateItem(userId, itemId, quantity) {
   const item = await models.CartItem.findOne({ where: { id: itemId, cartId: cart.id } });
   if (!item) throw ApiError.notFound('Cart item not found');
 
-  const stock = await stockFor({ productId: item.productId, variantId: item.variantId });
-  if (qty > stock) throw ApiError.unprocessable(`Only ${stock} units in stock`);
-
+  // Note: capacity is only verified at add time, not when a line is updated.
   item.quantity = qty;
   await item.save();
   return getCart(userId);
