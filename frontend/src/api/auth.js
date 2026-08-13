@@ -25,6 +25,12 @@ export const authApi = {
     }
     clearTokens();
   },
+  me() {
+    return api.get('/users/me', { auth: true });
+  },
+  updateMe(payload) {
+    return api.patch('/users/me', payload, { auth: true });
+  },
   get currentUser() {
     try {
       return JSON.parse(localStorage.getItem('shopflow_user') || 'null');

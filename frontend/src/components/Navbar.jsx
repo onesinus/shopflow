@@ -1,8 +1,10 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const { user, isAuthenticated, isAdmin, isStaff, logout } = useAuth();
+  const { count } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -24,6 +26,7 @@ export default function Navbar() {
         </NavLink>
         <NavLink to="/cart" className={linkClass}>
           Cart
+          {isAuthenticated && count > 0 && <span className="cart-badge">{count}</span>}
         </NavLink>
         {isAuthenticated && (
           <NavLink to="/orders" className={linkClass}>

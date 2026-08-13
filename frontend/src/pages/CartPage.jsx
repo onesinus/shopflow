@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { cartApi } from '../api/cart';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import Price from '../components/Price';
 import Spinner from '../components/Spinner';
 
 export default function CartPage() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { refresh: refreshCart } = useCart();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,12 +23,15 @@ export default function CartPage() {
     setLoading(true);
     cartApi
       .get()
-      .then(setCart)
+      .then((c) => {
+        setCart(c);
+        refreshCart();
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, [isAuthenticated]);
+  useEffect(load, [isAuthenticated, refreshCart]);
 
   const changeQty = async (item, qty) => {
     if (qty < 1) return;
