@@ -289,23 +289,23 @@ async function getUserOrder(orderId) {
   return order;
 }
 
-async function cancelOrder(userId, orderId) {
-  const order = await models.Order.findOne({
-    where: {
-      id: orderId,
-      userId,
-    },
-  });
+// async function cancelOrder(userId, orderId) {
+//   const order = await models.Order.findOne({
+//     where: {
+//       id: orderId,
+//       userId,
+//     },
+//   });
 
-  if (!order) {
-    throw ApiError.notFound('Order not found');
-  }
+//   if (!order) {
+//     throw ApiError.notFound('Order not found');
+//   }
 
-  if (!['pending', 'paid'].includes(order.status)) {
-    throw ApiError.badRequest(
-      'This order can no longer be cancelled'
-    );
-  }
+//   if (!['pending', 'paid'].includes(order.status)) {
+//     throw ApiError.badRequest(
+//       'This order can no longer be cancelled'
+//     );
+//   }
 
   /*
    * C02 FIX:
