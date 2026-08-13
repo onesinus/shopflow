@@ -46,10 +46,14 @@ async function listAddresses(userId) {
 
 async function addAddress(userId, address) {
   const count = await models.Address.count({ where: { userId } });
+  const makeDefault = count === 0 || Boolean(address.isDefault);
+  if (makeDefault) {
+    await models.Address.update({ isDefault: false }, { where: { userId } });
+  }
   return models.Address.create({
     userId,
     ...address,
-    isDefault: count === 0 ? true : Boolean(address.isDefault),
+    isDefault: makeDefault,
   });
 }
 

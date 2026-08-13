@@ -182,7 +182,7 @@ Cart responses include `subtotalCents`, `shippingCents`, `taxCents`,
 | POST   | /orders              | Checkout (place an order)        |
 | GET    | /orders              | Current user's orders            |
 | GET    | /orders/:orderId     | Order detail                     |
-| POST   | /orders/:orderId/cancel | Cancel a pending/paid order   |
+| POST   | /orders/:orderId/cancel | Cancel a pending order (owner only) |
 
 ### POST /orders
 
@@ -195,6 +195,10 @@ Cart responses include `subtotalCents`, `shippingCents`, `taxCents`,
 ```
 
 Returns the created order with `items`, `payment`, `address` and `coupon`.
+
+Cancellation is allowed only by the owner while the order is `pending`;
+non-pending orders return `409`. On cancel the stock is restored and an
+`audit_logs` row is written.
 
 ---
 

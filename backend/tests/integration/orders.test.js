@@ -107,4 +107,84 @@ describe('/api/v1/orders', () => {
     const res = await request(app).get(`/api/v1/orders/${orderId}`).set(auth(bobToken));
     expect(res.status).toBe(404);
   });
+
+  it('cancels a pending order, restores stock and writes an audit log', async () => {
+    const user = await createUser();
+    const token = await loginAs(user.email);
+    const category = await createCategory();
+    const product = await createProduct(category.id, { sku: 'C-1', priceCents: 1000 });
+    await createInventory(product.id, 3);
+    const address = await models.Address.create({
+      userId: user.id,
+      firstName: 'A',
+      lastName: 'B',
+      line1: '6 Main St',
+      city: 'Portland',
+      country: 'US',
+    });
+
+    const order = await models.Order.create({
+      orderNumber: 'SF-CANCEL-1',
+      userId: user.id,
+      addressId: address.id,
+      subtotalCents: 2000,
+      shippingCents: 0,
+      taxCents: 0,
+      discountCents: 0,
+      totalCents: 2000,
+      currency: 'USD',
+      status: 'pending',
+      paymentStatus: 'pending',
+    });
+    await models.OrderItem.create({
+      orderId: order.id,
+      productId: product.id,
+      productName: product.name,
+      sku: product.sku,
+      unitPriceCents: 1000,
+      quantity: 2,
+      totalCents: 2000,
+    });
+
+    const res = await request(app).post(`/api/v1/orders/${order.id}/cancel`).set(auth(token));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.status).toBe('cancelled');
+
+    const inventory = await models.Inventory.findOne({ where: { productId: product.id } });
+    expect(inventory.quantity).toBe(5);
+
+    const audit = await models.AuditLog.findOne({ where: { entityType: 'Order', entityId: order.id } });
+    expect(audit.action).toBe('order.cancel');
+  });
+
+  it('returns 409 for an order that can no longer be cancelled', async () => {
+    const user = await createUser();
+    const token = await loginAs(user.email);
+    const address = await models.Address.create({
+      userId: user.id,
+      firstName: 'A',
+      lastName: 'B',
+      line1: '7 Main St',
+      city: 'Portland',
+      country: 'US',
+    });
+
+    const order = await models.Order.create({
+      orderNumber: 'SF-NOCANCEL',
+      userId: user.id,
+      addressId: address.id,
+      subtotalCents: 1000,
+      shippingCents: 0,
+      taxCents: 0,
+      discountCents: 0,
+      totalCents: 1000,
+      currency: 'USD',
+      status: 'paid',
+      paymentStatus: 'paid',
+    });
+
+    const res = await request(app).post(`/api/v1/orders/${order.id}/cancel`).set(auth(token));
+    expect(res.status).toBe(409);
+  });
 });
