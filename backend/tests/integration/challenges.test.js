@@ -19,7 +19,7 @@ describe('/api/v1 challenges', () => {
   });
 
   describe('C01 - cart quantity is not validated against stock on update', () => {
-    it.skip('rejects raising a line quantity above available stock', async () => {
+    it('rejects raising a line quantity above available stock', async () => {
       const user = await createUser();
       const token = await loginAs(user.email);
       const category = await createCategory();

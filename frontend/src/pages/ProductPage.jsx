@@ -61,7 +61,9 @@ export default function ProductPage() {
   );
 
   const selectedStock =
-    selectedVariant?.stock ?? product?.stock ?? 0;
+    selectedVariant?.inventory?.quantity ??
+    product?.inventory?.quantity ??
+    0;
 
   const handleAddToCart = async () => {
     if (selectedStock <= 0) {
@@ -128,11 +130,6 @@ export default function ProductPage() {
   }
   // const selectedVariant = product.variants?.find((v) => v.id === variantId);
   const hasVariants = (product.variants?.length ?? 0) > 0;
-  const productStock = product.stock ?? product.inventory?.quantity ?? 0;
-  const stock =
-    hasVariants && selectedVariant
-      ? (selectedVariant.stock ?? selectedVariant.inventory?.quantity ?? 0)
-      : productStock;
 
   return (
     <div className="container">
