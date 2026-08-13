@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const sequelize = require('../config/database');
 const { models } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { buildPagination } = require('../utils/paginate');
@@ -45,11 +46,25 @@ async function listAddresses(userId) {
 }
 
 async function addAddress(userId, address) {
-  const count = await models.Address.count({ where: { userId } });
-  return models.Address.create({
-    userId,
-    ...address,
-    isDefault: count === 0 ? true : Boolean(address.isDefault),
+  return sequelize.transaction(async (transaction) => {
+    const count = await models.Address.count({ where: { userId }, transaction });
+    const isDefault = count === 0 ? true : Boolean(address.isDefault);
+
+    if (isDefault) {
+      await models.Address.update(
+        { isDefault: false },
+        { where: { userId }, transaction }
+      );
+    }
+
+    return models.Address.create(
+      {
+        userId,
+        ...address,
+        isDefault,
+      },
+      { transaction }
+    );
   });
 }
 

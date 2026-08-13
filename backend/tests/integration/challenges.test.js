@@ -77,7 +77,7 @@ describe('/api/v1 challenges', () => {
   });
 
   describe('C04 - multiple default addresses are allowed', () => {
-    it.skip('keeps exactly one default address for a user', async () => {
+    it('keeps exactly one default address for a user', async () => {
       const user = await createUser();
       const token = await loginAs(user.email);
 
