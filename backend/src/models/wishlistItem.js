@@ -8,7 +8,10 @@ const WishlistItem = sequelize.define(
     userId: { type: DataTypes.INTEGER, allowNull: false, field: 'user_id' },
     productId: { type: DataTypes.INTEGER, allowNull: false, field: 'product_id' },
   },
-  { tableName: 'wishlist_items' }
+  {
+    tableName: 'wishlist_items',
+    indexes: [{ unique: true, fields: ['user_id', 'product_id'] }],
+  }
 );
 
 WishlistItem.associate = function (models) {
