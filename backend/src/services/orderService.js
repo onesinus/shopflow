@@ -252,6 +252,37 @@ async function cancelOrder(userId, orderId) {
    * C02 FIX:
    * Return the reserved stock back to inventory when
    * an order is cancelled.
+*   */
+/*  const orderItems = await models.OrderItem.findAll({
+*    where: {
+*      orderId: order.id,
+*    },
+*  });
+*
+*  for (const item of orderItems) {
+*    const inventory = await inventoryFor(item);
+*
+*    if (inventory) {
+*      inventory.quantity += item.quantity;
+*      await inventory.save();
+*    }
+*  }
+*
+*  order.status = 'cancelled';
+*  order.paymentStatus = 'failed';
+*
+*  await order.save();
+*
+*  await notificationService.create(userId, {
+*    type: 'order_cancelled',
+*    title: 'Order cancelled',
+*    body: `Order ${order.orderNumber} was cancelled.`,
+*    link: `/orders/${order.orderNumber}`,
+*  });
+*
+*  return order;
+*}
+*/
    */
   
   const orderItems = await models.OrderItem.findAll({

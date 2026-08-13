@@ -385,7 +385,13 @@ textarea:focus {
   font-size: 1.6rem;
 }
 
+.stock-meta {
+  margin: 12px 0 8px;
+}
+
 .stock-chip {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 2px 8px;
