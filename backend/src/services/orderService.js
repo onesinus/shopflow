@@ -178,22 +178,11 @@ async function countOrders() {
   return models.Order.count();
 }
 
-async function cancelOrder(userId, orderId, options = {}) {
+async function cancelOrder(userId, orderId) {
   const order = await models.Order.findOne({ where: { id: orderId, userId } });
   if (!order) throw ApiError.notFound('Order not found');
-  if (order.status !== 'pending') {
-    throw ApiError.conflict('This order can no longer be cancelled');
-  }
-
-  const before = order.toJSON();
-
-  const items = await models.OrderItem.findAll({ where: { orderId: order.id } });
-  for (const item of items) {
-    const inventory = await inventoryFor(item);
-    if (inventory) {
-      inventory.quantity += item.quantity;
-      await inventory.save();
-    }
+  if (!['pending', 'paid'].includes(order.status)) {
+    throw ApiError.badRequest('This order can no longer be cancelled');
   }
 
   order.status = 'cancelled';
@@ -205,16 +194,6 @@ async function cancelOrder(userId, orderId, options = {}) {
     title: 'Order cancelled',
     body: `Order ${order.orderNumber} was cancelled.`,
     link: `/orders/${order.orderNumber}`,
-  });
-
-  await writeAudit({
-    actorUserId: userId,
-    action: 'order.cancel',
-    entityType: 'Order',
-    entityId: order.id,
-    before: { status: before.status, paymentStatus: before.paymentStatus },
-    after: { status: order.status, paymentStatus: order.paymentStatus },
-    ip: options.ip,
   });
 
   return order;
