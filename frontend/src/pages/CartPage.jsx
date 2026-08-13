@@ -37,6 +37,7 @@ export default function CartPage() {
     if (qty < 1) return;
     try {
       await cartApi.updateItem(item.id, qty);
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       load();
     } catch (err) {
       toast(err.message, 'error');
@@ -46,6 +47,7 @@ export default function CartPage() {
   const remove = async (itemId) => {
     try {
       await cartApi.removeItem(itemId);
+      window.dispatchEvent(new CustomEvent('cart:updated'));
       load();
     } catch (err) {
       toast(err.message, 'error');

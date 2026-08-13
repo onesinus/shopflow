@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { cartApi } from '../api/cart';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -6,6 +8,35 @@ export default function Navbar() {
   const { user, isAuthenticated, isAdmin, isStaff, logout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const refreshCartCount = async () => {
+      if (!isAuthenticated) {
+        setCartCount(0);
+        return;
+      }
+
+      try {
+        const cart = await cartApi.get();
+        const count = Array.isArray(cart?.items)
+          ? cart.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)
+          : 0;
+        setCartCount(count);
+      } catch {
+        setCartCount(0);
+      }
+    };
+
+    refreshCartCount();
+
+    const handleCartUpdated = () => refreshCartCount();
+    window.addEventListener('cart:updated', handleCartUpdated);
+
+    return () => {
+      window.removeEventListener('cart:updated', handleCartUpdated);
+    };
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     await logout();
