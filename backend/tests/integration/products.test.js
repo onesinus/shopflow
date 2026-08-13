@@ -56,6 +56,34 @@ describe('GET /api/v1/products', () => {
     expect(res.body.meta.total).toBe(1);
     expect(res.body.data[0].name).toBe('Monitor');
   });
+
+  it('filters by brand', async () => {
+    const brandCategory = await createCategory();
+    await createProduct(brandCategory.id, { sku: 'BR-1', name: 'Branded Widget', brand: 'Acme' });
+    const res = await request(app).get('/api/v1/products?brand=Acme');
+    expect(res.body.meta.total).toBe(1);
+    expect(res.body.data[0].name).toBe('Branded Widget');
+  });
+
+  it('sorts by price ascending and descending', async () => {
+    const asc = await request(app).get('/api/v1/products?sort=price_asc');
+    const prices = asc.body.data.map((p) => p.priceCents);
+    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+
+    const desc = await request(app).get('/api/v1/products?sort=price_desc');
+    const pricesDesc = desc.body.data.map((p) => p.priceCents);
+    expect(pricesDesc).toEqual([...pricesDesc].sort((a, b) => b - a));
+  });
+
+  it('rejects invalid sort values with 400', async () => {
+    const res = await request(app).get('/api/v1/products?sort=bogus');
+    expect(res.status).toBe(400);
+  });
+
+  it('includes the applied filters in meta', async () => {
+    const res = await request(app).get('/api/v1/products?q=laptop&sort=price_asc');
+    expect(res.body.meta.filters).toEqual({ q: 'laptop', sort: 'price_asc' });
+  });
 });
 
 describe('GET /api/v1/products/:id', () => {

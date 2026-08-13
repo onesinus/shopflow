@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 const OrderItem = sequelize.define(
   'OrderItem',
   {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    id: { type: DataTypes.INTEGER, primaryKey: true, auIncrement: true },
     orderId: { type: DataTypes.INTEGER, allowNull: false, field: 'order_id' },
     productId: { type: DataTypes.INTEGER, allowNull: false, field: 'product_id' },
     variantId: { type: DataTypes.INTEGER, allowNull: true, field: 'variant_id' },

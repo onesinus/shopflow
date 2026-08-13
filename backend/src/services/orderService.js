@@ -8,6 +8,9 @@ const notificationService = require('./notificationService');
 const mailer = require('./mailer');
 const { writeAudit } = require('../utils/audit');
 const { buildPagination } = require('../utils/paginate');
+const { Order, OrderItem, Inventory, sequelize } = require('../models');
+
+
 
 function generateOrderNumber() {
   const suffix = Date.now().toString().slice(-8);
@@ -183,6 +186,20 @@ async function cancelOrder(userId, orderId) {
   if (!order) throw ApiError.notFound('Order not found');
   if (!['pending', 'paid'].includes(order.status)) {
     throw ApiError.badRequest('This order can no longer be cancelled');
+  }
+  
+  const orderItems = await models.OrderItem.findAll({
+    where: {
+      orderId: order.id,
+    },
+  });
+  
+  for (const item of orderItems) {
+    const inventory = await inventoryFor(item);
+    if (inventory) {
+      inventory.quantity += item.quantity;
+      await inventory.save();
+    }
   }
 
   order.status = 'cancelled';

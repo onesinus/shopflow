@@ -2,6 +2,32 @@ const { models } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { buildPagination } = require('../utils/paginate');
 const searchService = require('./searchService');
+const sequelize = require('../config/database');
+
+const SORT_OPTIONS = ['price_asc', 'price_desc', 'newest', 'rating', 'relevance'];
+
+function sortOrder(query) {
+  const sort = query.sort || 'relevance';
+  switch (sort) {
+    case 'price_asc':
+      return [['priceCents', 'ASC'], ['name', 'ASC']];
+    case 'price_desc':
+      return [['priceCents', 'DESC'], ['name', 'ASC']];
+    case 'newest':
+      return [['createdAt', 'DESC']];
+    case 'rating':
+      return [
+        [sequelize.literal('(SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = Product.id)'), 'DESC'],
+        ['name', 'ASC'],
+      ];
+    case 'relevance':
+    default:
+      return [
+        ['featured', 'DESC'],
+        ['name', 'ASC'],
+      ];
+  }
+}
 
 async function listProducts(query) {
   const { page, limit, offset } = buildPagination(query);
@@ -13,10 +39,7 @@ async function listProducts(query) {
       { model: models.Category, as: 'category' },
       { model: models.Inventory, as: 'inventory' },
     ],
-    order: [
-      ['featured', 'DESC'],
-      ['name', 'ASC'],
-    ],
+    order: sortOrder(query),
     offset,
     limit,
     distinct: true,
@@ -78,4 +101,4 @@ async function listByCategorySlug(slug, query) {
   return { rows, count, page, limit, category };
 }
 
-module.exports = { listProducts, getProductBySlug, listFeatured, listCategories, listByCategorySlug };
+module.exports = { listProducts, getProductBySlug, listFeatured, listCategories, listByCategorySlug, SORT_OPTIONS };

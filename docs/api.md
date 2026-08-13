@@ -121,10 +121,14 @@ Query params:
 | `brand`    | Brand filter                                   |
 | `min_price`| Minimum price in cents                         |
 | `max_price`| Maximum price in cents                         |
+| `inStock`  | `true` only returns products with stock > 0    |
+| `sort`     | `price_asc`, `price_desc`, `newest`, `rating`, `relevance` (default `relevance`) |
 | `page`     | 1-based page number (default 1)                |
-| `limit`    | Page size (default 10, max 100)                |
+| `limit`    | Page size (default 10, max 50)                 |
 
-Response items include `category` and `inventory` associations.
+Filters combine with each other and with `q`. An invalid `sort` value returns
+`400`. `meta` echoes the applied `filters` so the UI can render the current
+state. Response items include `category` and `inventory` associations.
 
 ---
 

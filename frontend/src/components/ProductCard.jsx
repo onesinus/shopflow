@@ -23,7 +23,7 @@ export default function ProductCard({ product }) {
           <Price cents={product.priceCents} />
           {product.stock !== undefined && (
             <span className={`stock-chip ${product.stock > 0 ? 'in' : 'out'}`}>
-              {product.stock > 0 ? 'In stock' : 'Out of stock'}
+              {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
             </span>
           )}
         </div>
