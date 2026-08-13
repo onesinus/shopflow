@@ -1,5 +1,11 @@
 import { api } from './client';
 
+export const CART_UPDATED_EVENT = 'shopflow:cart-updated';
+
+export function dispatchCartUpdated() {
+  window.dispatchEvent(new CustomEvent(CART_UPDATED_EVENT));
+}
+
 export const cartApi = {
   get() {
     return api.get('/cart', { auth: true });

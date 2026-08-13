@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { productsApi } from '../api/products';
-import { cartApi } from '../api/cart';
+import { cartApi, dispatchCartUpdated } from '../api/cart';
 import { wishlistApi } from '../api/cart';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -47,6 +47,7 @@ export default function ProductPage() {
     try {
       await cartApi.addItem(product.id, quantity, variantId);
       toast('Added to cart', 'success');
+      refreshCart();
     } catch (err) {
       toast(err.message, 'error');
     } finally {

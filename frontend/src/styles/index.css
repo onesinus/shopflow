@@ -169,6 +169,20 @@ code {
   color: #92400e;
 }
 
+.cart-badge {
+  margin-left: 8px;
+  min-width: 24px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -557,6 +571,20 @@ textarea:focus {
 .cart-summary {
   position: sticky;
   top: 80px;
+}
+
+.cart-badge {
+  margin-left: 0.35rem;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 0.1rem 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .summary-row {

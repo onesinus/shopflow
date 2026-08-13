@@ -1,12 +1,11 @@
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
-// Safety cap for deep pagination - protects the API from expensive scans.
-const MAX_OFFSET = 100;
 
 function buildPagination(query = {}) {
   const page = Math.max(parseInt(query.page, 10) || 1, 1);
   const limit = Math.min(parseInt(query.limit, 10) || DEFAULT_LIMIT, MAX_LIMIT);
-  const offset = Math.min((page - 1) * limit, MAX_OFFSET);
+  const offset = (page - 1) * limit;
+
   return { page, limit, offset };
 }
 
