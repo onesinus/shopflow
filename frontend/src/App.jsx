@@ -23,6 +23,8 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 
+import PromoPage from './pages/PromoPage';
+
 export default function App() {
   return (
     <div className="app-shell">
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/promo" element={<PromoPage />} />
           <Route
             path="/checkout"
             element={

@@ -55,6 +55,9 @@ export default function Navbar() {
         <NavLink to="/" className={linkClass} end>
           Catalog
         </NavLink>
+        <NavLink to="/promo" className={linkClass} end>
+          Promo
+        </NavLink>
         <NavLink to="/cart" className={linkClass}>
           Cart
           {isAuthenticated && count > 0 && <span className="cart-badge">{count}</span>}

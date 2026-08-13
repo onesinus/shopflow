@@ -13,7 +13,7 @@ async function register({ email, firstName, lastName, password }) {
   email = email.trim().toLowerCase();
   const exists = await models.User.findOne({ where: { email } });
   if (exists) {
-    throw ApiError.conflict('An account with this email already exists');
+    throw ApiError.conflict('An account with this email already exists. use another email.');
   }
 
   const user = await models.User.create({
