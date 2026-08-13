@@ -24,9 +24,18 @@ function buildSearchWhere(query) {
 }
 
 function searchClause(q) {
-  return sequelize.where(sequelize.fn('LOWER', sequelize.col('Product.name')), {
-    [Op.like]: `%${q.toLowerCase()}%`,
-  });
+  const escapedQuery = String(q)
+    .toLowerCase()
+    .replace(/\\/g, '\\\\')
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_');
+
+  return sequelize.where(
+    sequelize.fn('LOWER', sequelize.col('Product.name')),
+    {
+      [Op.like]: `%${escapedQuery}%`,
+    }
+  );
 }
 
 module.exports = { buildSearchWhere, searchClause };
