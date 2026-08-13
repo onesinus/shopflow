@@ -75,6 +75,7 @@ async function updateProduct(id, data, options = {}) {
 
   const before = product.toJSON();
   await product.update(patch);
+  cache.del(`product:${id}`);
 
   await writeAudit({
     actorUserId: options.actorId,
@@ -127,6 +128,7 @@ async function createVariant(productId, data, options = {}) {
     quantity: data.stock !== undefined ? data.stock : 0,
     lowStockThreshold: 5,
   });
+  cache.del(`product:${productId}`);
 
   await writeAudit({
     actorUserId: options.actorId,
