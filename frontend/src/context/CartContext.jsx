@@ -27,6 +27,21 @@ export function CartProvider({ children }) {
     refresh();
   }, [refresh, location.pathname]);
 
+  // Poll the cart periodically while the user is authenticated so
+  // the navbar badge stays in sync with server-side cart changes.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let mounted = true;
+    const id = setInterval(() => {
+      if (!mounted) return;
+      refresh();
+    }, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [isAuthenticated, refresh]);
+
   const value = useMemo(() => ({ count, refresh }), [count, refresh]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
