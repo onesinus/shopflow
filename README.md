@@ -7,7 +7,8 @@ features and outdated tests are documented so you can practice debugging,
 testing and refactoring.
 
 > ⚠️ This repository is a teaching tool. Some tests intentionally fail and some
-> features intentionally misbehave. See [docs/known-issues.md](docs/known-issues.md).
+> features intentionally misbehave. See [docs/known-issues.md](docs/known-issues.md)
+> and the [challenge board](docs/challenges.md) for extra scored tasks.
 
 ## Stack
 

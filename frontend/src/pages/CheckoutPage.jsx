@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { cartApi } from '../api/cart';
 import { ordersApi, addressApi, couponsApi } from '../api/orders';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import Price from '../components/Price';
 import Spinner from '../components/Spinner';
 
 export default function CheckoutPage() {
   const { toast } = useToast();
+  const { refresh: refreshCart } = useCart();
   const navigate = useNavigate();
 
   const [cart, setCart] = useState(null);
@@ -73,6 +75,7 @@ export default function CheckoutPage() {
         couponCode: couponCode || undefined,
       });
       toast('Order placed', 'success');
+      refreshCart();
       navigate(`/orders/${order.id}`);
     } catch (err) {
       setError(err.message);
@@ -91,6 +94,13 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const discountCents = coupon
+    ? coupon.discountType === 'percent'
+      ? Math.floor((cart.subtotalCents * coupon.discountValue) / 100)
+      : Math.min(coupon.discountValue, cart.subtotalCents)
+    : 0;
+  const totalCents = Math.max(cart.subtotalCents - discountCents + cart.shippingCents + cart.taxCents, 0);
 
   return (
     <div className="container">
@@ -180,7 +190,7 @@ export default function CheckoutPage() {
           {coupon && (
             <div className="summary-row">
               <span>Discount</span>
-              <span className="discount">−{coupon.discountLabel || 'coupon'}</span>
+              <span className="discount">−<Price cents={discountCents} /></span>
             </div>
           )}
           <div className="summary-row">
@@ -193,7 +203,7 @@ export default function CheckoutPage() {
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <Price cents={cart.totalCents} />
+            <Price cents={totalCents} />
           </div>
           <button type="button" className="btn btn-primary btn-block" onClick={placeOrder} disabled={placing}>
             {placing ? 'Placing order…' : 'Place order'}
