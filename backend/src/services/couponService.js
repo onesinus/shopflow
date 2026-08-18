@@ -1,3 +1,4 @@
+const { Op, literal } = require('sequelize');
 const { models } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { toDollars } = require('../utils/money');
@@ -26,15 +27,40 @@ async function validateCoupon({ code, subtotalCents, userId }) {
   return coupon;
 }
 
-async function redeem(coupon, userId, orderId) {
-  await models.CouponRedemption.create({
-    couponId: coupon.id,
-    userId,
-    orderId,
-  });
+async function redeem(coupon, userId, orderId, transaction) {
+  const where = {
+    id: coupon.id,
+    isActive: true,
+  };
 
-  coupon.usesCount += 1;
-  await coupon.save();
+  if (coupon.maxUses !== null) {
+    where.usesCount = {
+      [Op.lt]: coupon.maxUses,
+    };
+  }
+
+  const [updated] = await models.Coupon.update(
+    {
+      usesCount: literal('"uses_count" + 1'),
+    },
+    {
+      where,
+      transaction,
+    }
+  );
+
+  if (updated !== 1) {
+    throw ApiError.badRequest('This coupon has reached its usage limit');
+  }
+
+  await models.CouponRedemption.create(
+    {
+      couponId: coupon.id,
+      userId,
+      orderId,
+    },
+    { transaction }
+  );
 }
 
 module.exports = { findByCode, validateCoupon, redeem };
