@@ -19,7 +19,15 @@ async function updateMe(userId, updates) {
   const user = await models.User.findByPk(userId);
   if (!user) throw ApiError.notFound('User not found');
 
-  await models.User.update({ ...updates }, { where: { id: userId } });
+  const userPatch = {};
+
+['firstName', 'lastName', 'email', 'phone'].forEach((key) => {
+  if (updates[key] !== undefined) {
+    userPatch[key] = updates[key];
+  }
+});
+
+await models.User.update(userPatch, { where: { id: userId } });
 
   let profile = await models.Profile.findOne({ where: { userId } });
   if (!profile) {
